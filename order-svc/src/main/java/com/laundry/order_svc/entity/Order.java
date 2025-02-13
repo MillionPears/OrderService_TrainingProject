@@ -1,0 +1,48 @@
+package com.laundry.order_svc.entity;
+
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.laundry.order_svc.enums.OrderStatus;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "orders")
+public class Order {
+    @Id
+    private UUID orderId = UUID.randomUUID();
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createDate = LocalDateTime.now();
+
+    @NotNull
+    @Column(unique = true)
+    private String phoneNumber;
+
+    @NotNull
+    @Size(min = 5, max = 255)
+    private String address;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    private String note;
+
+    @ManyToOne()
+    @JoinColumn(name = "user_id")
+    @NotNull
+    private User user;
+}
