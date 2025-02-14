@@ -14,8 +14,8 @@ public class GloabalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
     public ApiResponse<Object> handleCustomException(CustomException ex ){
-        return new ApiResponse<>(
-                ex.getErrorCode().getStatus(),
+        return new ApiResponse<Object>(
+                ex.getErrorCode().getStatus().value(),
                 Collections.singletonList(ex.getErrorCode().getMessage())
         );
 

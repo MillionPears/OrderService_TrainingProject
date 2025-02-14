@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Setter
@@ -19,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends AuditorExample{
     @Id
     private UUID userId = UUID.randomUUID();
 
@@ -38,4 +39,10 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders ;
+
+    @Version
+    private Long version;
 }

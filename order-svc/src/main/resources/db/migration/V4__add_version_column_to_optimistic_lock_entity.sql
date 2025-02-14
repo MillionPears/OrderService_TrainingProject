@@ -1,0 +1,3 @@
+ALTER TABLE orders ADD COLUMN version BIGINT;
+
+ALTER TABLE users ADD COLUMN version BIGINT;

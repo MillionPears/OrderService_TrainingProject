@@ -58,6 +58,7 @@ public class UserController {
             @RequestParam String name,
             @PageableDefault(page = 0, size = 10) Pageable pageable){
         List<UserResponse> list = userService.searchUserByName(name,pageable);
+        if(list.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(new ApiResponse<>(list));
     }
 
@@ -66,6 +67,7 @@ public class UserController {
             @RequestParam Gender gender,
             @PageableDefault(page = 0, size = 10) Pageable pageable){
         List<UserResponse> list = userService.filterUserByGender(gender,pageable);
+        if(list.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(new ApiResponse<>(list));
     }
 

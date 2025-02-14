@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "Invalid request data"),
     NOT_FOUND(HttpStatus.NOT_FOUND, "Not found"),
-    DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Database error occurred");
+    CONFLICT(HttpStatus.CONFLICT, "Database conflict");
 
 
     private final HttpStatus status;

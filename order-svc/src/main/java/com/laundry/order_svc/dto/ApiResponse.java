@@ -18,11 +18,11 @@ import java.util.List;
 public class ApiResponse<T> {
     private T data;
     private List<String> errors;
-    private HttpStatus errorCode;
+    private int errorCode;
 
     private OffsetDateTime timestamp;
 
-    public ApiResponse(HttpStatus errorCode, List<String> errors) {
+    public ApiResponse(int errorCode, List<String> errors) {
         this.errorCode = errorCode;
         this.errors = errors;
         this.timestamp = OffsetDateTime.now();

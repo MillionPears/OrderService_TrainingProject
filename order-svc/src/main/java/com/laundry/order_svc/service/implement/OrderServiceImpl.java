@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.expression.spel.ast.OpOr;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Service
@@ -34,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
                     .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
             order.setUser(user);
             order.setStatus(OrderStatus.PENDING);
+            //order.setCreatedDate(LocalDateTime.now());
             order = orderRepository.save(order);
             OrderResponse orderResponse = orderMapper.toDTO(order);
             orderResponse.setUserId(String.valueOf(order.getUser().getUserId()));

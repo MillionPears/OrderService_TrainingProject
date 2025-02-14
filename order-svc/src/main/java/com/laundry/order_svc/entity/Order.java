@@ -13,6 +13,7 @@ import lombok.Setter;
 
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Setter
@@ -21,12 +22,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "orders")
-public class Order {
+public class Order extends AuditorExample{
     @Id
     private UUID orderId = UUID.randomUUID();
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createDate = LocalDateTime.now();
 
     @NotNull
     @Column(unique = true)
@@ -45,4 +44,7 @@ public class Order {
     @JoinColumn(name = "user_id")
     @NotNull
     private User user;
+
+    @Version
+    private Long version;
 }

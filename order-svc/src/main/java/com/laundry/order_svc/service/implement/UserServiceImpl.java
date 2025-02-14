@@ -2,6 +2,7 @@ package com.laundry.order_svc.service.implement;
 
 import com.laundry.order_svc.dto.UserRequest;
 import com.laundry.order_svc.dto.UserResponse;
+import com.laundry.order_svc.entity.Order;
 import com.laundry.order_svc.entity.User;
 import com.laundry.order_svc.enums.Gender;
 import com.laundry.order_svc.exception.CustomException;
@@ -10,13 +11,16 @@ import com.laundry.order_svc.mapstruct.UserMapper;
 import com.laundry.order_svc.repository.UserRepository;
 import com.laundry.order_svc.repository.specification.UserSpecification;
 import com.laundry.order_svc.service.UserService;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 
@@ -33,7 +37,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    @Transactional
+    @org.springframework.transaction.annotation.Transactional
     public UserResponse createUser(UserRequest userRequest) {
             User user = userMapper.toEntity(userRequest);
             user = userRepository.save(user);
@@ -45,6 +49,10 @@ public class UserServiceImpl implements UserService {
     public UserResponse getUserByUserId(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new CustomException(ErrorCode.NOT_FOUND));
+        user.getOrders().stream()
+                .forEach(order -> {
+                    System.out.println(order.getPhoneNumber());
+                });
 
         return userMapper.toDTO(user);
     }
@@ -73,11 +81,15 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse updateUser(UUID userId, UserRequest userRequest) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
-        userMapper.updateUserFromRequest(userRequest,user);
-        userRepository.save(user);
-        return userMapper.toDTO(user);
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+            userMapper.updateUserFromRequest(userRequest, user);
+            userRepository.save(user);
+            return userMapper.toDTO(user);
+        } catch (OptimisticLockingFailureException e) {
+            throw new CustomException(ErrorCode.CONFLICT);
+        }
     }
 
     @Override
