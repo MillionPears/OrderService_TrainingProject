@@ -5,10 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -40,9 +37,6 @@ public class User extends AuditorExample{
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
-
-    @OneToMany(mappedBy = "user")
-    private List<Order> orders ;
 
     private Integer point;
 

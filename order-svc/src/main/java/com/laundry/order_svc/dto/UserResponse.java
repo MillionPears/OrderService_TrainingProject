@@ -1,6 +1,7 @@
 package com.laundry.order_svc.dto;
 
 import com.laundry.order_svc.enums.Gender;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 @Setter
 @Getter
+@Builder
 public class UserResponse {
 
     private UUID userId;

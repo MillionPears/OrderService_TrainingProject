@@ -7,8 +7,10 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -16,6 +18,7 @@ import java.util.Date;
 @Setter
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public class UserRequest {
 
     public interface Create {}
