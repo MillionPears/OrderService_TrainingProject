@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +31,7 @@ public class User extends AuditorExample{
 
     @NotNull
     @Past
-    private Date dob;
+    private LocalDate dob;
 
     @NotNull
     @Size(min = 10, max = 15)
@@ -43,6 +44,8 @@ public class User extends AuditorExample{
     @OneToMany(mappedBy = "user")
     private List<Order> orders ;
 
+    private Integer point;
+
     @Version
-    private Long version;
+    private Long version = 0L;
 }

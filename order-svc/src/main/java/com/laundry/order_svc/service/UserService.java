@@ -18,5 +18,6 @@ public interface UserService {
     UserResponse updateUser(UUID userId,UserRequest userRequest);
     List<UserResponse> searchUserByName(String name, Pageable pageable);
     List<UserResponse> filterUserByGender(Gender gender,Pageable pageable);
-    //List<UserResponse> getAllUsersSorted(String sortBy, String sortDirection);
+    Page<UserResponse> searchAndFilterNotIndex( String name, Gender gender, String sortBy, String sortDirection, Pageable pageable);
+    Page<UserResponse> searchAndFilterWithIndex(String name, Gender gender, String sortBy, String sortDirection, Pageable pageable);
 }

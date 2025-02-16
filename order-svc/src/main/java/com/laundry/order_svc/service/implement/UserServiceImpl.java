@@ -11,17 +11,13 @@ import com.laundry.order_svc.mapstruct.UserMapper;
 import com.laundry.order_svc.repository.UserRepository;
 import com.laundry.order_svc.repository.specification.UserSpecification;
 import com.laundry.order_svc.service.UserService;
-import jakarta.persistence.OptimisticLockException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -37,22 +33,24 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public UserResponse createUser(UserRequest userRequest) {
             User user = userMapper.toEntity(userRequest);
+            if(userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.CONFLICT);
             user = userRepository.save(user);
             System.out.println(user.getName());
             return userMapper.toDTO(user);
     }
 
     @Override
+    @Transactional
     public UserResponse getUserByUserId(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new CustomException(ErrorCode.NOT_FOUND));
-        user.getOrders().stream()
-                .forEach(order -> {
-                    System.out.println(order.getPhoneNumber());
-                });
+//        user.getOrders().stream()
+//                .forEach(order -> {
+//                    System.out.println(order.getPhoneNumber());
+//                });
 
         return userMapper.toDTO(user);
     }
@@ -85,6 +83,8 @@ public class UserServiceImpl implements UserService {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
             userMapper.updateUserFromRequest(userRequest, user);
+            if(userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.CONFLICT);
+            userMapper.updateUserSetToNull(userRequest, user);
             userRepository.save(user);
             return userMapper.toDTO(user);
         } catch (OptimisticLockingFailureException e) {
@@ -110,5 +110,23 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Page<UserResponse> searchAndFilterNotIndex( String name, Gender gender, String sortBy, String sortDirection, Pageable pageable) {
+        Specification<User> specification = Specification
+                .where(UserSpecification.hasGender(gender))
+                .and(UserSpecification.hasName(name));
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection),sortBy);
+        Pageable pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        Page<User> userPage = userRepository.findAll(specification, pageRequest);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserResponse> searchAndFilterWithIndex(String name, Gender gender, String sortBy, String sortDirection, Pageable pageable) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection),sortBy);
+        Pageable pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort );
+        Page<User> userPage = userRepository.filterByNameAndGenderWithIndex(name, gender, pageRequest);
+        return userPage.map(userMapper::toDTO);
+    }
 
 }

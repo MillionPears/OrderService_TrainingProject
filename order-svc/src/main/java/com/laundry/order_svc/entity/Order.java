@@ -28,7 +28,7 @@ public class Order extends AuditorExample{
 
 
     @NotNull
-    @Column(unique = true)
+    @Column()
     private String phoneNumber;
 
     @NotNull
@@ -46,5 +46,5 @@ public class Order extends AuditorExample{
     private User user;
 
     @Version
-    private Long version;
+    private Long version = 0L;
 }

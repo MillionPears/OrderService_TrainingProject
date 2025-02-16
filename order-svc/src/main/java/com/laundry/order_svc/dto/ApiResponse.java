@@ -19,7 +19,6 @@ public class ApiResponse<T> {
     private T data;
     private List<String> errors;
     private int errorCode;
-
     private OffsetDateTime timestamp;
 
     public ApiResponse(int errorCode, List<String> errors) {

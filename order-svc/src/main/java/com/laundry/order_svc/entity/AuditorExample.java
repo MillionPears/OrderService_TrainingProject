@@ -24,4 +24,5 @@ public abstract class AuditorExample {
 
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
+
 }

@@ -17,7 +17,7 @@ public class OrderRequest {
 
 
     @NotNull
-    @Column(unique = true)
+    @Column()
     private String phoneNumber;
 
     @NotNull

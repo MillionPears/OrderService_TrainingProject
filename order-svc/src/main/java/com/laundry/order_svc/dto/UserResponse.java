@@ -4,6 +4,7 @@ import com.laundry.order_svc.enums.Gender;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Date;
@@ -15,9 +16,10 @@ public class UserResponse {
 
     private UUID userId;
     private String fullname;
-    private Date dob;
+    private LocalDate dob;
     private String phoneNumber;
     private Gender gender;
+    private Integer point;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
 }
