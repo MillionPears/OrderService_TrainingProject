@@ -1,0 +1,2 @@
+ALTER TABLE orders
+ADD COLUMN note VARCHAR(255)
