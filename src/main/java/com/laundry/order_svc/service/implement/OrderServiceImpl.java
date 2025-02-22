@@ -1,6 +1,6 @@
 package com.laundry.order_svc.service.implement;
 
-import com.laundry.order_svc.dto.OrderRequest;
+import com.laundry.order_svc.dto.OrderCreateRequest;
 import com.laundry.order_svc.dto.OrderResponse;
 import com.laundry.order_svc.entity.Order;
 import com.laundry.order_svc.entity.User;
@@ -25,9 +25,9 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional
-  public OrderResponse createOrder(OrderRequest orderRequest) {
-    Order order = orderMapper.toEntity(orderRequest);
-    User user = userRepository.findById(orderRequest.getUserId())
+  public OrderResponse createOrder(OrderCreateRequest orderCreateRequest) {
+    Order order = orderMapper.toEntity(orderCreateRequest);
+    User user = userRepository.findById(orderCreateRequest.getUserId())
       .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
     order.setUser(user);
     order.setStatus(OrderStatus.PENDING);

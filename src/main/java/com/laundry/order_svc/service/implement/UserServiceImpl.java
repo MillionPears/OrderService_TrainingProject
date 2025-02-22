@@ -1,7 +1,8 @@
 package com.laundry.order_svc.service.implement;
 
-import com.laundry.order_svc.dto.UserRequest;
+import com.laundry.order_svc.dto.UserCreateRequest;
 import com.laundry.order_svc.dto.UserResponse;
+import com.laundry.order_svc.dto.UserUpdateRequest;
 import com.laundry.order_svc.entity.User;
 import com.laundry.order_svc.enums.Gender;
 import com.laundry.order_svc.exception.CustomException;
@@ -10,8 +11,8 @@ import com.laundry.order_svc.mapstruct.UserMapper;
 import com.laundry.order_svc.repository.UserRepository;
 import com.laundry.order_svc.repository.specification.UserSpecification;
 import com.laundry.order_svc.service.UserService;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,15 +32,17 @@ public class UserServiceImpl implements UserService {
 
   private final UserMapper userMapper;
   private final UserRepository userRepository;
-
+  private final TransactionTemplate transactionTemplate;
+  private final EntityManager entityManager;
   @Override
-  @Transactional
-  public UserResponse createUser(UserRequest userRequest) {
-    User user = userMapper.toEntity(userRequest);
+  @Transactional()
+  public UserResponse createUser( UserCreateRequest userCreateRequest) {
+    User user = userMapper.toEntity(userCreateRequest);
     if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.CONFLICT);
     user = userRepository.save(user);
-    System.out.println(user.getName());
-    return userMapper.toDTO(user);
+
+    return
+      userMapper.toDTO(user);
   }
 
   @Override
@@ -46,50 +50,20 @@ public class UserServiceImpl implements UserService {
   public UserResponse getUserByUserId(UUID userId) {
     User user = userRepository.findById(userId)
       .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
-//        user.getOrders().stream()
-//                .forEach(order -> {
-//                    System.out.println(order.getPhoneNumber());
-//                });
-
     return userMapper.toDTO(user);
   }
 
 
-//    @Override
-//    @Transactional
-//    public UserResponse updateUser(UUID userId, Map<String, Object> updates) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
-//        updates.forEach((key, value) -> {
-//            try {
-//                String setterMethodName = "set" + key.substring(0, 1).toUpperCase() + key.substring(1); // "fullname" -> setFullname
-//                Method setterMethod = UserRequest.class.getMethod(setterMethodName, value.getClass());  // setFullname -> getFullname
-//                user = userMapper.toEntity(setterMethod.invoke(new UserRequest(), value));
-//
-//            } catch (Exception e) {
-//                // Xử lý trường hợp không tìm thấy setter hoặc có lỗi khi gọi setter
-//                // Ví dụ, log lỗi hoặc ném exception tùy theo yêu cầu
-//            }
-//        });
-//        userRepository.save(user);
-//        return userMapper.toDTO(user);
-//    }
-
-  @Override
-  @Transactional
-  public UserResponse updateUser(UUID userId, UserRequest userRequest) {
-    try {
-      User user = userRepository.findById(userId)
-        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
-      userMapper.updateUserFromRequest(userRequest, user);
-      if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.CONFLICT);
-      userMapper.updateUserSetToNull(userRequest, user);
-      userRepository.save(user);
-      return userMapper.toDTO(user);
-    } catch (OptimisticLockingFailureException e) {
-      throw new CustomException(ErrorCode.CONFLICT);
-    }
-  }
+@Override
+@Transactional
+public UserResponse updateUser(UUID userId, UserUpdateRequest userUpdateRequest) {
+    User user = userRepository.findById(userId)
+      .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+    userMapper.updateUserFromRequest(userUpdateRequest, user);
+    if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.CONFLICT);
+    user = userRepository.save(user);
+    return userMapper.toDTO(user);
+}
 
   @Override
   public List<UserResponse> searchUserByName(String name, Pageable pageable) {
@@ -121,10 +95,20 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Page<UserResponse> searchAndFilterWithIndex(String name, Gender gender, String sortBy, String sortDirection, Pageable pageable) {
+  public Page<UserResponse> searchAndFilterWithIndex(String name,
+                                                     Gender gender,
+                                                     String sortBy,
+                                                     String sortDirection,
+                                                     Pageable pageable) {
+//    if (!sortBy.matches("name|gender")) {
+//      throw new CustomException(ErrorCode.BAD_REQUEST);
+//    }
+//    if (!sortDirection.equalsIgnoreCase("ASC") && !sortDirection.equalsIgnoreCase("DESC")) {
+//      throw new CustomException(ErrorCode.BAD_REQUEST);
+//    }
     Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
     Pageable pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-    Page<User> userPage = userRepository.filterByNameAndGenderWithIndex(name, gender, pageRequest);
+    Page<User> userPage = userRepository.filterByNameAndGenderWithIndex(gender, name, pageRequest);
     return userPage.map(userMapper::toDTO);
   }
 

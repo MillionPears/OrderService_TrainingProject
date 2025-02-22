@@ -1,5 +1,6 @@
 package com.laundry.order_svc.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.laundry.order_svc.enums.Gender;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +17,7 @@ public class UserResponse {
 
   private UUID userId;
   private String fullname;
+  @JsonFormat()
   private LocalDate dob;
   private String phoneNumber;
   private Gender gender;

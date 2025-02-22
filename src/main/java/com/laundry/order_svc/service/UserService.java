@@ -1,7 +1,8 @@
 package com.laundry.order_svc.service;
 
-import com.laundry.order_svc.dto.UserRequest;
+import com.laundry.order_svc.dto.UserCreateRequest;
 import com.laundry.order_svc.dto.UserResponse;
+import com.laundry.order_svc.dto.UserUpdateRequest;
 import com.laundry.order_svc.enums.Gender;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,12 +12,12 @@ import java.util.UUID;
 
 
 public interface UserService {
-  UserResponse createUser(UserRequest userRequest);
+  UserResponse createUser(  UserCreateRequest userCreateRequest);
 
   UserResponse getUserByUserId(UUID userId);
 
   //List<UserResponse> getAllUsers();
-  UserResponse updateUser(UUID userId, UserRequest userRequest);
+  UserResponse updateUser(UUID userId, UserUpdateRequest userUpdateRequest);
 
   List<UserResponse> searchUserByName(String name, Pageable pageable);
 

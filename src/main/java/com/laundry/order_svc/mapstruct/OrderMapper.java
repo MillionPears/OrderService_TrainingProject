@@ -1,6 +1,6 @@
 package com.laundry.order_svc.mapstruct;
 
-import com.laundry.order_svc.dto.OrderRequest;
+import com.laundry.order_svc.dto.OrderCreateRequest;
 import com.laundry.order_svc.dto.OrderResponse;
 import com.laundry.order_svc.entity.Order;
 import org.mapstruct.Mapper;
@@ -12,7 +12,7 @@ public interface OrderMapper {
 
 
   @Mapping(target = "orderId", ignore = true)
-  Order toEntity(OrderRequest orderRequest);
+  Order toEntity(OrderCreateRequest orderCreateRequest);
 
   OrderResponse toDTO(Order order);
 

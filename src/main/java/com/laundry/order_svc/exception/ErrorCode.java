@@ -7,7 +7,6 @@ public enum ErrorCode {
   NOT_FOUND(HttpStatus.NOT_FOUND, "Not found"),
   CONFLICT(HttpStatus.CONFLICT, "Database conflict");
 
-
   private final HttpStatus status;
   private final String message;
 

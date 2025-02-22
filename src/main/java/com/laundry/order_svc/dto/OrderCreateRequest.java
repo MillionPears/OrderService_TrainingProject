@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)   // Do not serialize null fields
-public class OrderRequest {
+public class OrderCreateRequest {
 
 
   @NotNull

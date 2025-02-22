@@ -19,19 +19,19 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class User extends AuditorExample {
+public class User extends Auditor {
   @Id
   private UUID userId = UUID.randomUUID();
 
-  @NotNull
-  @Size(min = 5)
+  @NotNull()
+  //@Size(min = 5)
   private String name;
 
-  @NotNull
+  @NotNull()
   @Past
   private LocalDate dob;
 
-  @NotNull
+  @NotNull()
   @Size(min = 10, max = 15)
   @Column(unique = true)
   private String phoneNumber;

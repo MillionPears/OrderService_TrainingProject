@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "orders")
-public class Order extends AuditorExample {
+public class Order extends Auditor {
   @Id
   private UUID orderId = UUID.randomUUID();
 
@@ -42,5 +42,5 @@ public class Order extends AuditorExample {
   private User user;
 
   @Version
-  private Long version = 0L;
+  private Long version;
 }

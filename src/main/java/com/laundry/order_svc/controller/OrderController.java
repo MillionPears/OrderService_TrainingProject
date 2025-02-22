@@ -1,7 +1,7 @@
 package com.laundry.order_svc.controller;
 
 import com.laundry.order_svc.dto.ApiResponse;
-import com.laundry.order_svc.dto.OrderRequest;
+import com.laundry.order_svc.dto.OrderCreateRequest;
 import com.laundry.order_svc.dto.OrderResponse;
 import com.laundry.order_svc.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,8 @@ public class OrderController {
   private final OrderService orderService;
 
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<ApiResponse<OrderResponse>> createOrder(@RequestBody OrderRequest orderRequest) {
-    OrderResponse orderResponse = orderService.createOrder(orderRequest);
+  public ResponseEntity<ApiResponse<OrderResponse>> createOrder(@RequestBody OrderCreateRequest orderCreateRequest) {
+    OrderResponse orderResponse = orderService.createOrder(orderCreateRequest);
     return ResponseEntity.status(HttpStatus.CREATED)
       .body(new ApiResponse<>(orderResponse));
   }
