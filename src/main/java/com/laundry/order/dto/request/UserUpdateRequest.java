@@ -2,6 +2,7 @@ package com.laundry.order.dto.request;
 
 import com.laundry.order.enums.Gender;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 public class UserUpdateRequest {
+  @Size(min = 5)
   private String name;
   @Past
   private LocalDate dob;

@@ -12,16 +12,24 @@ import com.laundry.order.enums.OrderStatus;
 import com.laundry.order.exception.CustomException;
 import com.laundry.order.exception.ErrorCode;
 import com.laundry.order.mapstruct.OrderMapper;
-import com.laundry.order.repository.*;
+import com.laundry.order.repository.OrderRepository;
+import com.laundry.order.repository.ProductRepository;
+import com.laundry.order.repository.UserRepository;
+import com.laundry.order.service.InventoryService;
 import com.laundry.order.service.OrderService;
 import com.laundry.order.service.PaymentService;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,42 +39,102 @@ public class OrderServiceImpl implements OrderService {
   private final OrderRepository orderRepository;
   private final UserRepository userRepository;
   private final ProductRepository productRepository;
-  private final OrderItemRepository orderItemRepository;
   private final PaymentService paymentService;
-  private final OrderMapper orderMapper;
+  private final InventoryService inventoryService;
+  private final OrderMapper mapper;
+  private final OrderTransactionService orderTransactionService;
+
 
   @Override
   @Transactional
+  @Retryable(
+    retryFor = {
+      ObjectOptimisticLockingFailureException.class,
+//      OptimisticLockingFailureException.class,
+//      OptimisticLockException.class,
+//      CannotAcquireLockException.class
+    },
+    maxAttempts = 3,
+    backoff = @Backoff(delay = 100, multiplier = 2, maxDelay = 1000)
+  )
   public OrderResponse createOrder(OrderCreateRequest orderCreateRequest) {
-    Order order = orderMapper.toEntity(orderCreateRequest);
-    User user = userRepository.findById(orderCreateRequest.getUserId())
+    try {
+      validateStock(orderCreateRequest);
+    } catch (RuntimeException exception) {
+      throw new CustomException(ErrorCode.CONFLICT);
+    }
+    if(orderCreateRequest.getIdempotentKey()!=null) {
+      return retryCreateOrder(orderCreateRequest.getIdempotentKey());
+    }
+    Order order = buildOrder(orderCreateRequest);
+    processOrderItems(order, orderCreateRequest.getItems());
+    order = orderTransactionService.saveOrder(order);
+
+    for (OrderItem item : order.getItems()) {
+      try {
+        inventoryService.reduceStock(item.getProduct().getId(), item.getQuantity());
+        reduceProductStock(item.getProduct().getId(), item.getQuantity());
+      } catch (OptimisticLockException e) {
+        throw e;
+      }
+    }
+    BigDecimal totalAmount = calculateTotalAmount(order);
+    paymentService.create(order, totalAmount);
+    return mapToOrderResponse(order, totalAmount);
+  }
+
+  private Product getProduct(UUID productId) {
+    return productRepository.findById(productId)
       .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+  }
+
+
+
+  private void validateStock(OrderCreateRequest orderCreateRequest) {
+    for (OrderItemCreateRequest item : orderCreateRequest.getItems()) {
+      Product product = getProduct(item.getProductId());
+      if (product.getStockQuantity() < item.getQuantity()) {
+        throw new RuntimeException("Not enough stock for product: " + product.getName());
+      }
+    }
+  }
+  private void reduceProductStock(UUID productId, int quantity){
+    Product product = productRepository.findById(productId).orElseThrow(
+      ()-> new CustomException(ErrorCode.NOT_FOUND));
+    product.setStockQuantity(product.getStockQuantity() - quantity);
+    productRepository.save(product);
+  }
+  private Order buildOrder(OrderCreateRequest request) {
+    User user = userRepository.findById(request.getUserId())
+      .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+    Order order = mapper.toEntity(request);
     order.setUser(user);
     order.setStatus(OrderStatus.PENDING);
-    order.setItems(new ArrayList<>());    for (OrderItemCreateRequest orderItemCreateRequest: orderCreateRequest.getItems()){
-      Product product = productRepository.findById(orderItemCreateRequest.getProductId()).orElseThrow(
-        ()-> new CustomException(ErrorCode.NOT_FOUND)
-      );
+    if (request.getIdempotentKey() == null) {
+      order.setIdempotentKey(UUID.randomUUID());
+    }
+    return order;
+  }
 
-      if(product.getStockQuantity()< orderItemCreateRequest.getQuantity()) {
-        throw new RuntimeException("Not enough stock for product: "+product.getName());
-      }
-
-      product.setStockQuantity(product.getStockQuantity()-orderItemCreateRequest.getQuantity());
-
+  private void processOrderItems(Order order, List<OrderItemCreateRequest> items) {
+    order.setItems(new ArrayList<>());
+    for (OrderItemCreateRequest item : items) {
+      Product product = getProduct(item.getProductId());
       OrderItem orderItem = OrderItem.builder()
         .order(order)
         .product(product)
-        .quantity(orderItemCreateRequest.getQuantity())
-        .price(orderItemCreateRequest.getPrice())
+        .quantity(item.getQuantity())
+        .price(item.getPrice())
         .build();
       order.getItems().add(orderItem);
-      }
-    order = orderRepository.save(order);
-    BigDecimal totalAmount = calculateTotalAmount(order);
-    paymentService.create(order, totalAmount);
-    System.out.println("haha" + order.getItems().getFirst().getProduct().getName());
-    return mapToOrderResponse(order,totalAmount);
+    }
+  }
+  private OrderResponse retryCreateOrder(UUID idempotentKey){
+      Order order = orderRepository.findByIdempotentKey(idempotentKey).orElseThrow(
+        ()-> new CustomException(ErrorCode.NOT_FOUND)
+      );
+      return mapToOrderResponse(order, calculateTotalAmount(order));
+
   }
   private BigDecimal calculateTotalAmount(Order order) {
     return order.getItems().stream()
@@ -75,7 +143,7 @@ public class OrderServiceImpl implements OrderService {
   }
 
   private OrderResponse mapToOrderResponse(Order order, BigDecimal totalAmount) {
-    OrderResponse response =  OrderResponse.builder()
+    OrderResponse response = OrderResponse.builder()
       .id(order.getId())
       .customerName(order.getCustomerName())
       .phoneNumber(order.getPhoneNumber())

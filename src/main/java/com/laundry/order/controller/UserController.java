@@ -73,11 +73,17 @@ public class UserController {
 
   @GetMapping(path = "/filter/index", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<Page<UserResponse>> searchAndFilterWithIndex(@RequestParam(required = false) String name,
-                                                                     @RequestParam(required = false) Gender gender,
+                                                                     @RequestParam(required = false) String gender,
                                                                      @RequestParam(defaultValue = "name") String sortBy,
                                                                      @RequestParam(defaultValue = "ASC") String sortDirection,
                                                                      Pageable pageable) {
     Page<UserResponse> userResponsePage = userService.searchAndFilterWithIndex(name, gender, sortBy, sortDirection, pageable);
     return ResponseEntity.ok(userResponsePage);
+  }
+
+  @PutMapping(path = "/updatelist")
+  public ResponseEntity<Integer> updateListUsers(@RequestParam(required = true) Integer point,
+                                                 @RequestParam(required = true) List<UUID> userIds){
+    return ResponseEntity.ok(userService.setPointWithListUser(point, userIds));
   }
 }

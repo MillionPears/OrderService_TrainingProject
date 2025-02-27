@@ -46,7 +46,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  @Transactional
   public UserResponse getUserByUserId(UUID userId) {
     User user = userRepository.findById(userId)
       .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
@@ -54,16 +53,27 @@ public class UserServiceImpl implements UserService {
   }
 
 
-@Override
-@Transactional
-public UserResponse updateUser(UUID userId, UserUpdateRequest userUpdateRequest) {
-    User user = userRepository.findById(userId)
-      .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
-    userMapper.updateUserFromRequest(userUpdateRequest, user);
-    if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.CONFLICT);
-    user = userRepository.save(user);
-    return userMapper.toDTO(user);
-}
+//@Override
+//@Transactional
+//public UserResponse updateUser(UUID userId, UserUpdateRequest userUpdateRequest) {
+//    User user = userRepository.findById(userId)
+//      .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+//    userMapper.updateUserFromRequest(userUpdateRequest, user);
+//    if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.CONFLICT);
+//    user = userRepository.save(user);
+//    return userMapper.toDTO(user);
+//}
+
+  @Override
+  public UserResponse updateUser(UUID userId, UserUpdateRequest userUpdateRequest) {
+    return transactionTemplate.execute(status -> {
+      User user = userRepository.findById(userId)
+        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+      userMapper.updateUserFromRequest(userUpdateRequest, user);
+      user = userRepository.save(user);
+      return userMapper.toDTO(user);
+    });
+  }
 
   @Override
   public List<UserResponse> searchUserByName(String name, Pageable pageable) {
@@ -96,7 +106,7 @@ public UserResponse updateUser(UUID userId, UserUpdateRequest userUpdateRequest)
 
   @Override
   public Page<UserResponse> searchAndFilterWithIndex(String name,
-                                                     Gender gender,
+                                                     String gender,
                                                      String sortBy,
                                                      String sortDirection,
                                                      Pageable pageable) {
@@ -110,6 +120,12 @@ public UserResponse updateUser(UUID userId, UserUpdateRequest userUpdateRequest)
     Pageable pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     Page<User> userPage = userRepository.filterByNameAndGenderWithIndex(gender, name, pageRequest);
     return userPage.map(userMapper::toDTO);
+  }
+
+  @Override
+  public int setPointWithListUser(Integer point, List<UUID> userIds) {
+
+    return userRepository.updatePointByListId(point, userIds);
   }
 
 }

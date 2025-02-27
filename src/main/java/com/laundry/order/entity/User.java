@@ -42,5 +42,5 @@ public class User extends Auditor {
   private Integer point;
 
   @Version
-  private Long version = 0L;
+  private Long version ;
 }

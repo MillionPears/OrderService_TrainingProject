@@ -19,7 +19,7 @@ public class Inventory extends Auditor {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID id;
 
-  @ManyToOne
+  @OneToOne
   @JoinColumn(name = "product_id", nullable = false)
   private Product product;
 
@@ -33,6 +33,6 @@ public class Inventory extends Auditor {
   private Integer totalQuantity;
 
   @Version
-  private Long version = 0L;
+  private Long version ;
 }
 

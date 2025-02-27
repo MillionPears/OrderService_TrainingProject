@@ -8,5 +8,6 @@ import java.util.UUID;
 
 public interface InventoryService {
   Inventory create(Product product);
-  void checkInventory(UUID productId, int quantity);
+//  void checkInventory(UUID productId, int quantity);
+  void reduceStock(UUID productId,Integer stock);
 }

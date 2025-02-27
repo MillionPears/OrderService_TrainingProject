@@ -12,9 +12,14 @@ import com.laundry.order.repository.ProductRepository;
 import com.laundry.order.service.InventoryService;
 import com.laundry.order.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,4 +55,14 @@ public class ProductServiceImpl implements ProductService {
     return list.stream()
       .map(mapper::toDTO).toList();
   }
+
+  @Override
+  public Page<ProductResponse> filterProductWithNameAndPrice(String name, BigDecimal minPrice, BigDecimal maxPrice, String sortBy, String sortDirection, Pageable pageable) {
+    Sort sort =Sort.by(Sort.Direction.fromString(sortDirection),sortBy);
+    Pageable pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),sort);
+    Page<Product> productPage = productRepository.filterByNameAndPrice(name, minPrice, maxPrice, pageable);
+    return productPage.map(mapper::toDTO);
+  }
+
+
 }

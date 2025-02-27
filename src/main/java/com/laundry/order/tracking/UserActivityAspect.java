@@ -1,20 +1,17 @@
 package com.laundry.order.tracking;
 
-import jakarta.annotation.PostConstruct;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 @Slf4j
@@ -24,10 +21,8 @@ import java.util.UUID;
 public class UserActivityAspect {
   private final TrackingService trackingService;
 
-  @PostConstruct
-  public void init() {   // check bean created?
-    log.info("UserActivityAspect initialized");
-  }
+  private final HttpServletRequest request;
+  private final ObjectMapper objectMapper;
 
   @Pointcut("execution(* com.laundry.order.controller.ProductController.getById(..))")
   public void getProductById() {
@@ -37,53 +32,46 @@ public class UserActivityAspect {
   public void createOrder() {
   }
 
-  @Before("getProductById()")
-  public void beforeGetById() {
-    log.info("Before getById execution");
-  }
+  @Pointcut("execution (* com.laundry.order.controller.UserController.searchAndFilterWithIndex(..))")
+  public void searchUserByNameAndGender(){}
 
-  @Pointcut("getProductById() || createOrder()")
+  @Pointcut("execution (* com.laundry.order.controller.CartController.addToCart(..))")
+  public void addToCart(){}
+
+  @Pointcut("getProductById() " +
+    "|| createOrder() " +
+    "|| searchUserByNameAndGender()" +
+    "|| addToCart()")
   public void userAndProductActivity() {
   }
 
   @Around("userAndProductActivity()")
   public Object trackUserActivity(ProceedingJoinPoint joinPoint) throws Throwable {
-    long start = System.currentTimeMillis();
-    ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-    if (attributes == null) {
-      log.warn("Không thể lấy request.");
-      return joinPoint.proceed();
-    }
-    HttpServletRequest request = attributes.getRequest();
     String userIdHeader = request.getHeader("X-User-Id");
-
-    if (userIdHeader == null) {
-      log.warn("Header 'X-User-Id' không được cung cấp.");
-      return joinPoint.proceed();
-    }
-    UUID userId;
-    try {
-      userId = UUID.fromString(userIdHeader);
-    } catch (IllegalArgumentException e) {
-      log.error("UserId không hợp lệ: {}", userIdHeader);
-      return joinPoint.proceed();
-    }
-
-    String methodName = joinPoint.getSignature().getName();
-    String endpoint = request.getRequestURI();
-    String requestData = joinPoint.getArgs() != null ? Arrays.toString(joinPoint.getArgs()) : "No Request Data";
+    UUID userId = UUID.fromString(userIdHeader);
+    String requestData = convertToJson(joinPoint.getArgs());
+    long start = System.currentTimeMillis();
     Object result = joinPoint.proceed();
     long duration = System.currentTimeMillis() - start;
-
-    String responseData;
+    String responseData = "";
     if (result instanceof ResponseEntity<?> responseEntity) {
-      Object body = responseEntity.getBody();
-      responseData = body != null ? body.toString() : "No Response Data";
+      responseData = convertToJson(responseEntity.getBody());
     } else {
-      responseData = result != null ? result.toString() : "No Response Data";
+      responseData = convertToJson(result);
     }
+    String methodName = joinPoint.getSignature().getName();
+    String endpoint = request.getRequestURI();
     trackingService.recordUserActivity(userId, methodName, endpoint, requestData, responseData, duration);
     return result;
+  }
+
+  private String convertToJson(Object object) {
+    try {
+      return objectMapper.writeValueAsString(object);
+    } catch (JsonProcessingException e) {
+      log.error("Không thể chuyển đổi sang JSON: {}", e.getMessage());
+      return "Không thể chuyển đổi JSON";
+    }
   }
 
 }

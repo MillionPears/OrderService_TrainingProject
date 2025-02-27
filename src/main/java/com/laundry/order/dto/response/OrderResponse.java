@@ -27,5 +27,6 @@ public class OrderResponse {
   private UUID userId;
   private LocalDateTime createdDate;
   private List<OrderItemResponse> items;
+  private UUID idempotentKey;
   private BigDecimal totalAmount;
 }

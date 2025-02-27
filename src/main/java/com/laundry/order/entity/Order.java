@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.UUID;
 
 @Setter
 @Getter
@@ -47,6 +48,8 @@ public class Order extends Auditor {
 
   @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
   private Payment payment;
+
+  private UUID idempotentKey;
   @Version
   private Long version;
 }

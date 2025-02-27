@@ -25,5 +25,7 @@ public interface UserService {
 
   Page<UserResponse> searchAndFilterNotIndex(String name, Gender gender, String sortBy, String sortDirection, Pageable pageable);
 
-  Page<UserResponse> searchAndFilterWithIndex(String name, Gender gender, String sortBy, String sortDirection, Pageable pageable);
+  Page<UserResponse> searchAndFilterWithIndex(String name, String gender, String sortBy, String sortDirection, Pageable pageable);
+
+  int setPointWithListUser(Integer point, List<UUID> userIds);
 }
