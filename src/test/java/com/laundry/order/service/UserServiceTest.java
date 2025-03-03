@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.*;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -91,17 +90,17 @@ public class UserServiceTest {
 //  }
 
   @Test
-  void updateUser_ShouldThrowCustomException_WhenUserNotFound(){
+  void updateUser_ShouldThrowCustomException_WhenUserByIdNotFound(){
     UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder().build();
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
     CustomException exception = assertThrows(CustomException.class,
-      ()-> userService.updateUser(userId, userUpdateRequest));
+      ()-> userService.updateUserById(userId, userUpdateRequest));
     assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     verify(userRepository).findById(userId);
   }
 
   @Test
-  void updateUser_ShouldThrowCustomException_WhenOptimisticLockingFailureOccurs(){
+  void updateUser_ById_ShouldThrowCustomException_WhenOptimisticLockingFailureOccurs(){
     UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder().build();
     User user = new User();
     when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -109,7 +108,7 @@ public class UserServiceTest {
     when(userRepository.save(user)).thenThrow(OptimisticLockingFailureException.class);
 
     CustomException exception = assertThrows(CustomException.class
-      ,() -> userService.updateUser(userId, userUpdateRequest) );
+      ,() -> userService.updateUserById(userId, userUpdateRequest) );
     assertEquals(ErrorCode.CONFLICT, exception.getErrorCode());
     verify(userRepository).findById(userId);
     verify(userMapper).updateUserFromRequest(userUpdateRequest, user);
@@ -117,7 +116,7 @@ public class UserServiceTest {
   }
 
   @Test
-  void updateUser_ShouldReturnUserResponse_WhenUserExists() {
+  void updateUser_ShouldReturnUserResponse_WhenUserByIdExists() {
     UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder().build();
     User user = new User();
     when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -126,7 +125,7 @@ public class UserServiceTest {
     UserResponse userResponse = UserResponse.builder().build();
     when(userMapper.toDTO(user)).thenReturn(userResponse);
 
-    UserResponse result = userService.updateUser(userId, userUpdateRequest);
+    UserResponse result = userService.updateUserById(userId, userUpdateRequest);
     assertEquals(userResponse, result);
     verify(userRepository).findById(userId);
     verify(userMapper).updateUserFromRequest(userUpdateRequest, user);
@@ -165,28 +164,28 @@ public class UserServiceTest {
 //    assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 //  }
 
-//  @Test
-//  void searchAndFilterWithIndex_ShouldReturnEmptyPage_WhenNoUsersMatch() {
-//    Page<User> userPage = Page.empty();
-//    when(userRepository.filterByNameAndGenderWithIndex(gender,name, pageable)).thenReturn(userPage);
-//    Page<UserResponse> result = userService.searchAndFilterWithIndex(name, gender, sortBy, sortDirection, pageable);
-//    assertTrue(result.isEmpty());
-//    verify(userRepository).filterByNameAndGenderWithIndex(gender,name, pageable);
-//    verify(userMapper,never()).toDTO(any());
-//  }
-//
+  @Test
+  void searchAndFilterWithIndex_ShouldReturnEmptyPage_WhenNoUsersMatch() {
+    Page<User> userPage = Page.empty();
+    when(userRepository.filterUserByNameAndGender(gender.toString(),name, pageable)).thenReturn(userPage);
+    Page<UserResponse> result = userService.filterUserByNameAndGender(name, gender.toString(), sortBy, sortDirection, pageable);
+    assertTrue(result.isEmpty());
+    verify(userRepository).filterUserByNameAndGender(gender.toString(),name, pageable);
+    verify(userMapper,never()).toDTO(any());
+  }
+
 //  @Test
 //  void searchAndFilterWithIndex_ShouldReturnPageOfUserResponse_WhenValidInputs(){
 //    User user = new User();
 //    UserResponse userResponse = UserResponse.builder().build();
 //    Page<User> userPage = new PageImpl<>(List.of(user),pageable,1);
-//    when(userRepository.filterByNameAndGenderWithIndex(gender,name, pageable))
+//    when(userRepository.filterUserByNameAndGender(gender,name, pageable))
 //      .thenReturn(userPage);
 //    when(userMapper.toDTO(user)).thenReturn(userResponse);
 //    Page<UserResponse> result = userService.searchAndFilterWithIndex(name, gender, sortBy, sortDirection, pageable);
 //    assertEquals(1, result.getTotalElements());
 //    assertEquals(userResponse, result.getContent().getFirst());
-//    verify(userRepository).filterByNameAndGenderWithIndex(gender,name, pageable);
+//    verify(userRepository).filterUserByNameAndGender(gender,name, pageable);
 //    verify(userMapper).toDTO(user);
 //  }
 }

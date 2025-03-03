@@ -11,7 +11,6 @@ import com.laundry.order.mapstruct.UserMapper;
 import com.laundry.order.repository.UserRepository;
 import com.laundry.order.repository.specification.UserSpecification;
 import com.laundry.order.service.UserService;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,7 +37,7 @@ public class UserServiceImpl implements UserService {
   @Transactional()
   public UserResponse createUser( UserCreateRequest userCreateRequest) {
     User user = userMapper.toEntity(userCreateRequest);
-    if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.CONFLICT);
+    if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.CONFLICT,"PhoneNumber already exists",user.getPhoneNumber());
     user = userRepository.save(user);
 
     return
@@ -48,14 +47,14 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserResponse getUserByUserId(UUID userId) {
     User user = userRepository.findById(userId)
-      .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+      .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND,"User not found",userId));
     return userMapper.toDTO(user);
   }
 
 
 //@Override
 //@Transactional
-//public UserResponse updateUser(UUID userId, UserUpdateRequest userUpdateRequest) {
+//public UserResponse updateUserById(UUID userId, UserUpdateRequest userUpdateRequest) {
 //    User user = userRepository.findById(userId)
 //      .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 //    userMapper.updateUserFromRequest(userUpdateRequest, user);
@@ -65,10 +64,10 @@ public class UserServiceImpl implements UserService {
 //}
 
   @Override
-  public UserResponse updateUser(UUID userId, UserUpdateRequest userUpdateRequest) {
+  public UserResponse updateUserById(UUID userId, UserUpdateRequest userUpdateRequest) {
     return transactionTemplate.execute(status -> {
       User user = userRepository.findById(userId)
-        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND,"user not found",userId));
       userMapper.updateUserFromRequest(userUpdateRequest, user);
       user = userRepository.save(user);
       return userMapper.toDTO(user);
@@ -93,19 +92,19 @@ public class UserServiceImpl implements UserService {
       .collect(Collectors.toList());
   }
 
-  @Override
-  public Page<UserResponse> searchAndFilterNotIndex(String name, Gender gender, String sortBy, String sortDirection, Pageable pageable) {
-    Specification<User> specification = Specification
-      .where(UserSpecification.hasGender(gender))
-      .and(UserSpecification.hasName(name));
-    Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
-    Pageable pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-    Page<User> userPage = userRepository.findAll(specification, pageRequest);
-    return userPage.map(userMapper::toDTO);
-  }
+//  @Override
+//  public Page<UserResponse> filterUserByNameAndGender(String name, Gender gender, String sortBy, String sortDirection, Pageable pageable) {
+//    Specification<User> specification = Specification
+//      .where(UserSpecification.hasGender(gender))
+//      .and(UserSpecification.hasName(name));
+//    Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+//    Pageable pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+//    Page<User> userPage = userRepository.findAll(specification, pageRequest);
+//    return userPage.map(userMapper::toDTO);
+//  }
 
   @Override
-  public Page<UserResponse> searchAndFilterWithIndex(String name,
+  public Page<UserResponse> filterUserByNameAndGender(String name,
                                                      String gender,
                                                      String sortBy,
                                                      String sortDirection,
@@ -118,14 +117,14 @@ public class UserServiceImpl implements UserService {
 //    }
     Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
     Pageable pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-    Page<User> userPage = userRepository.filterByNameAndGenderWithIndex(gender, name, pageRequest);
+    Page<User> userPage = userRepository.filterUserByNameAndGender(gender, name, pageRequest);
     return userPage.map(userMapper::toDTO);
   }
 
   @Override
-  public int setPointWithListUser(Integer point, List<UUID> userIds) {
+  public int updateUserPointByListUserIds(Integer point, List<UUID> userIds) {
 
-    return userRepository.updatePointByListId(point, userIds);
+    return userRepository.updateUserPointByListId(point, userIds);
   }
 
 }

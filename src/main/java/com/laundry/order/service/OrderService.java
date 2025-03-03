@@ -6,5 +6,5 @@ import org.springframework.stereotype.Service;
 
 
 public interface OrderService {
-  OrderResponse createOrder(OrderCreateRequest orderCreateRequest);
+  OrderResponse createOrder(OrderCreateRequest orderCreateRequest,String idempotentKey);
 }

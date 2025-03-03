@@ -1,11 +1,8 @@
 package com.laundry.order.service.implement;
 
-import com.laundry.order.dto.response.PaymentResponse;
 import com.laundry.order.entity.Order;
 import com.laundry.order.entity.Payment;
 import com.laundry.order.enums.PaymentStatus;
-import com.laundry.order.exception.CustomException;
-import com.laundry.order.exception.ErrorCode;
 import com.laundry.order.repository.OrderRepository;
 import com.laundry.order.repository.PaymentRepository;
 import com.laundry.order.service.PaymentService;
@@ -22,7 +19,7 @@ public class PaymentServiceImpl implements PaymentService {
   private final OrderRepository orderRepository;
   @Override
   @Transactional
-  public void create(Order order, BigDecimal totalAmount) {
+  public void createPayment(Order order, BigDecimal totalAmount) {
     if(order == null) throw new RuntimeException("order must be not null");
     Payment payment = Payment.builder()
       .order(order)

@@ -1,6 +1,7 @@
 package com.laundry.order.dto.request;
 
 import jakarta.persistence.Column;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -20,10 +21,6 @@ public class ProductCreateRequest {
   private String description;
 
   @NotNull
+  @Min(0)
   private BigDecimal price;
-
-  @NotNull
-  private Integer stockQuantity;
-
-  private String category;
 }

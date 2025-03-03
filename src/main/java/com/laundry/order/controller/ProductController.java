@@ -2,9 +2,7 @@ package com.laundry.order.controller;
 
 import com.laundry.order.dto.ApiResponse;
 import com.laundry.order.dto.request.ProductCreateRequest;
-import com.laundry.order.dto.request.UserCreateRequest;
 import com.laundry.order.dto.response.ProductResponse;
-import com.laundry.order.dto.response.UserResponse;
 import com.laundry.order.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,20 +29,20 @@ public class ProductController {
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<ApiResponse<ProductResponse>> create(
     @Valid @RequestBody ProductCreateRequest productCreateRequest) {
-    ProductResponse productResponse = productService.create(productCreateRequest);
+    ProductResponse productResponse = productService.createProduct(productCreateRequest);
     return ResponseEntity.status(HttpStatus.CREATED)
       .body(new ApiResponse<>(productResponse));
   }
 
   @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<ApiResponse<ProductResponse>> getById(@PathVariable UUID id){
-    ProductResponse productResponse = productService.getById(id);
+    ProductResponse productResponse = productService.getProductById(id);
     return ResponseEntity.ok(new ApiResponse<>(productResponse));
   }
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<ApiResponse<List<ProductResponse>>> getAll(){
-    List<ProductResponse> list = productService.getAll();
+    List<ProductResponse> list = productService.getAllUser();
     return ResponseEntity.ok(new ApiResponse<>(list));
   }
 
@@ -55,7 +53,7 @@ public class ProductController {
                                                                            @RequestParam(defaultValue = "name") String sortBy,
                                                                            @RequestParam(defaultValue = "ASC") String sortDirection,
                                                                            Pageable pageable){
-    Page<ProductResponse> productResponses = productService.filterProductWithNameAndPrice(name, minPrice, maxPrice, sortBy, sortDirection, pageable);
+    Page<ProductResponse> productResponses = productService.filterProductByNameAndPrice(name, minPrice, maxPrice, sortBy, sortDirection, pageable);
     return ResponseEntity.status(HttpStatus.OK).body(productResponses);
 
   }

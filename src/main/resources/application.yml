@@ -22,6 +22,7 @@ spring:
     level:
       org.hibernate.SQL: DEBUG
       org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+      com.laundry.order: DEBUG
 
   flyway:
     enabled: true

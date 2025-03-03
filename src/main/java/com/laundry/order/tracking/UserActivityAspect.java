@@ -24,46 +24,70 @@ public class UserActivityAspect {
   private final HttpServletRequest request;
   private final ObjectMapper objectMapper;
 
-  @Pointcut("execution(* com.laundry.order.controller.ProductController.getById(..))")
+  @Pointcut("execution(* com.laundry.order.controller.ProductController.getProductById(..))")
   public void getProductById() {
+  }
+
+  @Pointcut("execution (* com.laundry.order.controller.CartController.addToCart(..))")
+  public void addToCart() {
   }
 
   @Pointcut("execution(* com.laundry.order.controller.OrderController.createOrder(..))")
   public void createOrder() {
   }
 
-  @Pointcut("execution (* com.laundry.order.controller.UserController.searchAndFilterWithIndex(..))")
-  public void searchUserByNameAndGender(){}
-
-  @Pointcut("execution (* com.laundry.order.controller.CartController.addToCart(..))")
-  public void addToCart(){}
-
   @Pointcut("getProductById() " +
-    "|| createOrder() " +
-    "|| searchUserByNameAndGender()" +
-    "|| addToCart()")
+    "|| addToCart()" +
+    "|| createOrder()")
   public void userAndProductActivity() {
   }
 
   @Around("userAndProductActivity()")
   public Object trackUserActivity(ProceedingJoinPoint joinPoint) throws Throwable {
-    String userIdHeader = request.getHeader("X-User-Id");
-    UUID userId = UUID.fromString(userIdHeader);
-    String requestData = convertToJson(joinPoint.getArgs());
+    UUID userId = null;
+    String requestData = "";
     long start = System.currentTimeMillis();
-    Object result = joinPoint.proceed();
-    long duration = System.currentTimeMillis() - start;
     String responseData = "";
-    if (result instanceof ResponseEntity<?> responseEntity) {
-      responseData = convertToJson(responseEntity.getBody());
-    } else {
-      responseData = convertToJson(result);
-    }
     String methodName = joinPoint.getSignature().getName();
     String endpoint = request.getRequestURI();
-    trackingService.recordUserActivity(userId, methodName, endpoint, requestData, responseData, duration);
+
+    try {
+      String userIdHeader = request.getHeader("X-User-Id");
+      userId = UUID.fromString(userIdHeader);
+      requestData = convertToJson(joinPoint.getArgs());
+    } catch (Exception e) {
+      log.error("Lỗi tracking trước khi gọi proceed: {}", e.getMessage());
+    }
+
+    Object result;
+    try {
+      result = joinPoint.proceed();
+      if (result instanceof ResponseEntity<?> responseEntity) {
+        responseData = convertToJson(responseEntity.getBody());
+      }
+    } catch (Throwable ex) {
+      responseData = "Request failed with exception: " + ex.getMessage();
+      log.error("Request bị lỗi trong proceed: {}", ex.getMessage(), ex);
+      throw ex;
+    } finally {
+      if (userId != null) {
+        long duration = System.currentTimeMillis() - start;
+        try {
+          trackingService.recordUserActivity(
+            userId, methodName, endpoint, requestData, responseData, duration
+          );
+          log.info("Tracking thành công: {} - {}", methodName, endpoint);
+        } catch (Exception e) {
+          log.error("Lỗi tracking sau khi gọi proceed: {}", e.getMessage());
+        }
+      } else {
+        log.warn("Không thể tracking vì userId không hợp lệ hoặc lỗi tracking trước proceed");
+      }
+    }
+
     return result;
   }
+
 
   private String convertToJson(Object object) {
     try {

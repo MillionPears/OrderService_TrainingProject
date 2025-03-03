@@ -28,11 +28,9 @@ public class CartServiceImpl implements CartService {
   @Transactional
   public CartResponse addToCart(UUID productId, int quantity, UUID userId) {
     Product product = productRepository.findById(productId).orElseThrow(
-      ()-> new CustomException(ErrorCode.NOT_FOUND)
+      ()-> new CustomException(ErrorCode.NOT_FOUND,"Product",productId)
     );
-    if(product.getStockQuantity() < quantity) {
-      throw new RuntimeException("Not enough stock available");
-    }
+
     Cart cart = Cart.builder()
       .user(userRepository.findById(userId).orElseThrow())
       .product(product)

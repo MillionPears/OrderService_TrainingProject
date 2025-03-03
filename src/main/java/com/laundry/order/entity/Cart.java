@@ -1,6 +1,5 @@
 package com.laundry.order.entity;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -18,6 +17,7 @@ public class Cart extends Auditor {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   private Long id;
 
   @ManyToOne
@@ -29,5 +29,6 @@ public class Cart extends Auditor {
   private Product product;
 
   @NotNull
+  @Column(name = "quantity")
   private Integer quantity;
 }
