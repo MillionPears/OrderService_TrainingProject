@@ -1,25 +1,27 @@
 package com.laundry.order.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public enum ErrorCode {
-  BAD_REQUEST(HttpStatus.BAD_REQUEST, "Invalid request data"),
-  NOT_FOUND(HttpStatus.NOT_FOUND, "Not found"),
-  CONFLICT(HttpStatus.CONFLICT, "Database conflict");
+  NOT_FOUND(HttpStatus.NOT_FOUND, "{} with ID {} not found"),
+  INVALID_FIELD(HttpStatus.BAD_REQUEST, "{} {}"),
+  CONFLICT(HttpStatus.CONFLICT, "{} already exists: {}"),
+  TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "{} timeout after {}"),
+  DATA_INTEGRITY_VIOLATION(HttpStatus.BAD_REQUEST, "Cannot {}: {}"),
+  OPTIMISTIC_LOCK(HttpStatus.CONFLICT, "{} update failed: {}");
 
   private final HttpStatus status;
-  private final String message;
+  private final String messageTemplate;
 
-  ErrorCode(HttpStatus status, String message) {
+  ErrorCode(HttpStatus status, String messageTemplate) {
     this.status = status;
-    this.message = message;
+    this.messageTemplate = messageTemplate;
   }
 
-  public HttpStatus getStatus() {
-    return status;
-  }
-
-  public String getMessage() {
-    return message;
+  public String formatMessage(Object... args) {
+    return String.format(messageTemplate.replace("{}", "%s"), args);
   }
 }
+

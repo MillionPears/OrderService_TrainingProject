@@ -1,6 +1,7 @@
 package com.laundry.order.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -13,26 +14,23 @@ import java.util.UUID;
 @Entity
 @Builder
 @Table(name = "inventory")
-public class Inventory extends Auditor {
+public class Inventory extends AbstractVersionedEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
   private UUID id;
 
-  @ManyToOne
-  @JoinColumn(name = "product_id", nullable = false)
-  private Product product;
+  @Column(name = "product_id", nullable = false)
+  private UUID productId;
 
   @NotNull
+  @Min(0)
+  @Column(name = "available_quantity")
   private Integer availableQuantity;
 
   @NotNull
-  private Integer reservedQuantity = 0;
-
-  @NotNull
-  private Integer totalQuantity;
-
-  @Version
-  private Long version = 0L;
+  @Min(0)
+  @Column(name = "reserved_quantity")
+  private Integer reservedQuantity;
 }
-

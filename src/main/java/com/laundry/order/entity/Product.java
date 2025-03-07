@@ -1,6 +1,7 @@
 package com.laundry.order.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,33 +11,28 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "products")
-public class Product extends Auditor {
+public class Product extends AbstractVersionedEntity {
 
   @Id
+  @Column(name = "id")
   private UUID id = UUID.randomUUID();
 
   @NotNull
-  @Column(unique = true)
+  @Column(name = "name", unique = true)
   private String name;
 
   @NotNull
+  @Column(name = "description")
   private String description;
 
   @NotNull
+  @Column(name = "price")
   private BigDecimal price;
 
-  @NotNull
-  private Integer stockQuantity;
-
-  private String category;
-
-  @Version
-  private Long version = 0L;
 }

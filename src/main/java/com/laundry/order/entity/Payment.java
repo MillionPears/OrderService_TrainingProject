@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -20,6 +19,7 @@ public class Payment extends Auditor {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   private Long id;
 
   @OneToOne
@@ -27,15 +27,14 @@ public class Payment extends Auditor {
   private Order order;
 
   @NotNull
+  @Column(name = "amount")
   private BigDecimal amount;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "method")
   private PaymentMethod method;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "status")
   private PaymentStatus status;
-
-  private LocalDateTime paymentDate;
-
-  private String transactionId;
 }

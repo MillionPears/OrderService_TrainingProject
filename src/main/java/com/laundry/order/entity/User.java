@@ -19,28 +19,31 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class User extends Auditor {
+public class User extends AbstractVersionedEntity {
+
   @Id
+  @Column(name = "id", nullable = false)
   private UUID id = UUID.randomUUID();
 
-  @NotNull()
+  @NotNull
   @Size(min = 5)
+  @Column(name = "name", nullable = false)
   private String name;
 
-  @NotNull()
+  @NotNull
   @Past
+  @Column(name = "dob", nullable = false)
   private LocalDate dob;
 
-  @NotNull()
+  @NotNull
   @Size(min = 10, max = 15)
-  @Column(unique = true)
+  @Column(name = "phone_number", unique = true, nullable = false)
   private String phoneNumber;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "gender", nullable = false)
   private Gender gender;
 
+  @Column(name = "point")
   private Integer point;
-
-  @Version
-  private Long version = 0L;
 }

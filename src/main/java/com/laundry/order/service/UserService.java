@@ -17,13 +17,15 @@ public interface UserService {
   UserResponse getUserByUserId(UUID userId);
 
   //List<UserResponse> getAllUsers();
-  UserResponse updateUser(UUID userId, UserUpdateRequest userUpdateRequest);
+  UserResponse updateUserById(UUID userId, UserUpdateRequest userUpdateRequest);
 
   List<UserResponse> searchUserByName(String name, Pageable pageable);
 
   List<UserResponse> filterUserByGender(Gender gender, Pageable pageable);
 
-  Page<UserResponse> searchAndFilterNotIndex(String name, Gender gender, String sortBy, String sortDirection, Pageable pageable);
+  //Page<UserResponse> filterUserByNameAndGender(String name, Gender gender, String sortBy, String sortDirection, Pageable pageable);
 
-  Page<UserResponse> searchAndFilterWithIndex(String name, Gender gender, String sortBy, String sortDirection, Pageable pageable);
+  Page<UserResponse> filterUserByNameAndGender(String name, String gender, String sortBy, String sortDirection, Pageable pageable);
+
+  int updateUserPointByListUserIds(Integer point, List<UUID> userIds);
 }

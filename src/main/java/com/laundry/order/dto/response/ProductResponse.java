@@ -23,10 +23,6 @@ public class ProductResponse {
   private String description;
 
   private BigDecimal price;
-
-  private Integer stockQuantity;
-
-  private String category;
   private LocalDateTime createdDate;
   private LocalDateTime lastModifiedDate;
 }

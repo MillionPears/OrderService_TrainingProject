@@ -1,0 +1,1 @@
+ALTER TABLE orders ADD COLUMN idempotent_key BINARY(16);

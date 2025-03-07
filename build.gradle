@@ -40,7 +40,12 @@ dependencies {
     testImplementation 'org.mockito:mockito-inline:3.11.2'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
-
+    implementation 'org.springframework.retry:spring-retry:2.0.11'
+    implementation 'org.springframework:spring-aspects:7.0.0-M1'
+    implementation 'org.apache.logging.log4j:log4j:2.8.2'
+    implementation('org.springframework.boot:spring-boot-starter') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
 
 }
 

@@ -4,7 +4,6 @@ import com.laundry.order.dto.ApiResponse;
 import com.laundry.order.dto.request.UserCreateRequest;
 import com.laundry.order.dto.response.UserResponse;
 import com.laundry.order.dto.request.UserUpdateRequest;
-import com.laundry.order.enums.Gender;
 import com.laundry.order.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,7 @@ public class UserController {
   @PatchMapping(path = "/update/{userId}", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable UUID userId,
                                                               @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
-    UserResponse userResponse = userService.updateUser(userId, userUpdateRequest);
+    UserResponse userResponse = userService.updateUserById(userId, userUpdateRequest);
     return ResponseEntity.status(HttpStatus.CREATED)
       .body(new ApiResponse<>(userResponse));
 
@@ -61,23 +60,29 @@ public class UserController {
     return ResponseEntity.ok(new ApiResponse<>(list));
   }
 
-  @GetMapping(path = "/filter", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Page<UserResponse>> searchAndFilterNotIndex(@RequestParam(required = false) String name,
-                                                                    @RequestParam(required = false) Gender gender,
-                                                                    @RequestParam(defaultValue = "name") String sortBy,
-                                                                    @RequestParam(defaultValue = "ASC") String sortDirection,
-                                                                    Pageable pageable) {
-    Page<UserResponse> userResponsePage = userService.searchAndFilterNotIndex(name, gender, sortBy, sortDirection, pageable);
-    return ResponseEntity.ok(userResponsePage);
-  }
+//  @GetMapping(path = "/filter", produces = MediaType.APPLICATION_JSON_VALUE)
+//  public ResponseEntity<Page<UserResponse>> searchAndFilterNotIndex(@RequestParam(required = false) String name,
+//                                                                    @RequestParam(required = false) String gender,
+//                                                                    @RequestParam(defaultValue = "name") String sortBy,
+//                                                                    @RequestParam(defaultValue = "ASC") String sortDirection,
+//                                                                    Pageable pageable) {
+//    Page<UserResponse> userResponsePage = userService.filterUserByNameAndGender(name, gender, sortBy, sortDirection, pageable);
+//    return ResponseEntity.ok(userResponsePage);
+//  }
 
-  @GetMapping(path = "/filter/index", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Page<UserResponse>> searchAndFilterWithIndex(@RequestParam(required = false) String name,
-                                                                     @RequestParam(required = false) Gender gender,
+  @GetMapping(path = "/filter", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<Page<UserResponse>> filterUserByNameAndGender(@RequestParam(required = false) String name,
+                                                                     @RequestParam(required = false) String gender,
                                                                      @RequestParam(defaultValue = "name") String sortBy,
                                                                      @RequestParam(defaultValue = "ASC") String sortDirection,
                                                                      Pageable pageable) {
-    Page<UserResponse> userResponsePage = userService.searchAndFilterWithIndex(name, gender, sortBy, sortDirection, pageable);
+    Page<UserResponse> userResponsePage = userService.filterUserByNameAndGender(name, gender, sortBy, sortDirection, pageable);
     return ResponseEntity.ok(userResponsePage);
+  }
+
+  @PutMapping(path = "/update/point")
+  public ResponseEntity<Integer> updateListUsers(@RequestParam(required = true) Integer point,
+                                                 @RequestParam(required = true) List<UUID> userIds){
+    return ResponseEntity.ok(userService.updateUserPointByListUserIds(point, userIds));
   }
 }

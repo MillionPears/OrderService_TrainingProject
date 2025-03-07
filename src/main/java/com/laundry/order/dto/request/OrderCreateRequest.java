@@ -33,7 +33,9 @@ public class OrderCreateRequest {
   private PaymentMethod paymentMethod;
 
   private String note;
+
   private List<OrderItemCreateRequest> items;
+
 
   @NotNull(message = "User ID cannot be null")
   private UUID userId;

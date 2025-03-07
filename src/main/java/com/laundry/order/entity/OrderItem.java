@@ -17,20 +17,22 @@ public class OrderItem extends Auditor {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   private Long id;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "order_id", nullable = false)
   private Order order;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "product_id", nullable = false)
   private Product product;
 
   @NotNull
-  private Integer quantity;
+  @Column(name = "quantity")
+  private int quantity;
 
   @NotNull
+  @Column(name = "price")
   private BigDecimal price;
 }
-

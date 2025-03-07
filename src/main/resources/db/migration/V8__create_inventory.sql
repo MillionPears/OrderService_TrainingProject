@@ -3,7 +3,6 @@ CREATE TABLE inventory (
     product_id BINARY(16) NOT NULL,
     available_quantity INT NOT NULL,
     reserved_quantity INT NOT NULL DEFAULT 0,
-    total_quantity INT NOT NULL,
     version BIGINT,
     created_date TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
     last_modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

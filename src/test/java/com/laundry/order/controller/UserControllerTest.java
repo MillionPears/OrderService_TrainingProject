@@ -48,15 +48,15 @@ public class UserControllerTest {
   void init() {
 
     userCreateRequest = UserCreateRequest.builder()
-      .fullname("Test5")
+      .name("Test5")
       .phoneNumber("1234567890")
       .dob(LocalDate.of(1995, 3, 2))
       .gender(Gender.MALE)
       .build();
 
     userResponse = UserResponse.builder()
-      .userId(userId)
-      .fullname("Test5")
+      .id(userId)
+      .name("Test5")
       .phoneNumber("1234567890")
       .dob(LocalDate.now())
       .gender(Gender.MALE)
@@ -69,7 +69,6 @@ public class UserControllerTest {
   void createUser_ShouldReturnCreatedStatus() throws Exception {
     // GIVEN
     String content = objectMapper.writeValueAsString(userCreateRequest);
-
     // WHEN
     when(userService.createUser(any(UserCreateRequest.class))).thenReturn(userResponse);
 
@@ -78,15 +77,15 @@ public class UserControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(content))
       .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.data.userId").value(userId.toString()))
-      .andExpect(jsonPath("$.data.fullname").value("Test5"))
+      .andExpect(jsonPath("$.data.id").value(userId.toString()))
+      .andExpect(jsonPath("$.data.name").value("Test5"))
       .andExpect(jsonPath("$.data.phoneNumber").value("1234567890"));
   }
 
   @Test
   @Disabled
   void createUser_ShouldReturnBadRequest_WhenUserRequestIsInValid() throws Exception {
-    userCreateRequest.setFullname("");
+    userCreateRequest.setName("");
     String content = objectMapper.writeValueAsString(userCreateRequest);
     log.info(content);
     mockMvc.perform(post("/api/v1/users")
