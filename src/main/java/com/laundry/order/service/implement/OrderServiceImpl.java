@@ -12,6 +12,7 @@ import com.laundry.order.enums.OrderStatus;
 import com.laundry.order.exception.CustomException;
 import com.laundry.order.exception.ErrorCode;
 import com.laundry.order.mapstruct.OrderMapper;
+import com.laundry.order.repository.OrderItemRepository;
 import com.laundry.order.repository.OrderRepository;
 import com.laundry.order.repository.ProductRepository;
 import com.laundry.order.repository.UserRepository;
@@ -40,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
   private final ProductRepository productRepository;
   private final InventoryService inventoryService;
   private final OrderMapper mapper;
+  private final OrderItemRepository orderItemRepository;
 
   @Override
   @Transactional
@@ -67,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
     order.setIdempotentKey(UUID.fromString(idempotentKey));
     log.info("[ORDER CREATE] -- Saving order to database");
     orderRepository.save(order);
-
+    orderItemRepository.saveAll(orderItems);
     log.info("[ORDER CREATE] -- Order successfully created with orderId = {}", order.getId());
     return buildOrderResponse(order, user, orderItems);
   }

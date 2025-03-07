@@ -55,7 +55,7 @@ public class Order extends AbstractVersionedEntity {
   @NotNull
   private User user;
 
-  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "order")
   private List<OrderItem> items = new ArrayList<>();
 
   @Column(name = "idempotent_key", unique = true)

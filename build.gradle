@@ -18,6 +18,9 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
 }
 
 repositories {
@@ -26,7 +29,10 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation ('org.springframework.boot:spring-boot-starter-web'){
+        //exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        //exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+    }
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
@@ -42,10 +48,16 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
     implementation 'org.springframework.retry:spring-retry:2.0.11'
     implementation 'org.springframework:spring-aspects:7.0.0-M1'
-    implementation 'org.apache.logging.log4j:log4j:2.8.2'
-    implementation('org.springframework.boot:spring-boot-starter') {
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-    }
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+//    implementation 'org.apache.logging.log4j:log4j:2.8.2'
+//    implementation 'org.apache.logging.log4j:log4j-core:2.24.3'
+//    implementation 'org.apache.logging.log4j:log4j-api:2.24.3'
+//    testImplementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.24.3'
+//    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+//    implementation('org.springframework.boot:spring-boot-starter') {
+//        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+//        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+//    }
 
 }
 

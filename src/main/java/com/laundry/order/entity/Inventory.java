@@ -30,7 +30,8 @@ public class Inventory extends AbstractVersionedEntity {
   private Integer availableQuantity;
 
   @NotNull
-  @Min(0)
   @Column(name = "reserved_quantity")
   private Integer reservedQuantity;
+
+
 }

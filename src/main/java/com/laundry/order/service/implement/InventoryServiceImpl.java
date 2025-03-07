@@ -31,14 +31,16 @@ public class InventoryServiceImpl implements InventoryService {
   public void createInventory(UUID productId) {
     Inventory inventory = Inventory.builder()
       .productId(productId)
-      .reservedQuantity(-1)
+      .reservedQuantity(0)
       .availableQuantity(10)
       .build();
-      validator.validateEntity(inventory);
+      //validator.validateEntity(inventory);
     inventoryRepository.save(inventory);
+
   }
 
   @Override
+  @Transactional
   public void reduceStock(Map<UUID, Integer> productQuantities) {
     List<UUID> productIds = new ArrayList<>(productQuantities.keySet());
 

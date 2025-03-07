@@ -21,8 +21,6 @@ public class TrackingService {
     tracking.setResponseData(responseData);
     tracking.setDuration(duration);
     trackingRepository.save(tracking);
-    System.out.println("Tracking saved successfully for user: " + userId);
-
   }
 
 }

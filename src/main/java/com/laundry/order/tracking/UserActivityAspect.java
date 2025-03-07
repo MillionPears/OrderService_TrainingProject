@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-@Slf4j
+@Log4j2
 @Aspect
 @Component
 @RequiredArgsConstructor
@@ -56,7 +57,7 @@ public class UserActivityAspect {
       userId = UUID.fromString(userIdHeader);
       requestData = convertToJson(joinPoint.getArgs());
     } catch (Exception e) {
-      log.error("Lỗi tracking trước khi gọi proceed: {}", e.getMessage());
+      log.error("[USER TRACKING] - Lỗi tracking trước khi gọi proceed: {}", e.getMessage());
     }
 
     Object result;
@@ -76,12 +77,12 @@ public class UserActivityAspect {
           trackingService.recordUserActivity(
             userId, methodName, endpoint, requestData, responseData, duration
           );
-          log.info("Tracking thành công: {} - {}", methodName, endpoint);
+          log.info("[USER TRACKING] - Tracking Successfully: {} - {}", methodName, endpoint);
         } catch (Exception e) {
-          log.error("Lỗi tracking sau khi gọi proceed: {}", e.getMessage());
+          log.error("Tracking Error while record activity: {}", e.getMessage());
         }
       } else {
-        log.warn("Không thể tracking vì userId không hợp lệ hoặc lỗi tracking trước proceed");
+        log.warn("[USER TRACKING] - Không thể tracking vì userId không hợp lệ hoặc lỗi tracking trước proceed");
       }
     }
 
@@ -93,8 +94,8 @@ public class UserActivityAspect {
     try {
       return objectMapper.writeValueAsString(object);
     } catch (JsonProcessingException e) {
-      log.error("Không thể chuyển đổi sang JSON: {}", e.getMessage());
-      return "Không thể chuyển đổi JSON";
+      log.error("[USER TRACKING] - Do not convert to JSON: [{}]", e.getMessage());
+      return "Do not convert to JSON";
     }
   }
 
