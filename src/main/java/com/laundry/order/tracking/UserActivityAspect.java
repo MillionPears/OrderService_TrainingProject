@@ -25,7 +25,7 @@ public class UserActivityAspect {
   private final HttpServletRequest request;
   private final ObjectMapper objectMapper;
 
-  @Pointcut("execution(* com.laundry.order.controller.ProductController.getProductById(..))")
+  @Pointcut("execution(* com.laundry.product.controller.ProductController.getProductById(..))")
   public void getProductById() {
   }
 

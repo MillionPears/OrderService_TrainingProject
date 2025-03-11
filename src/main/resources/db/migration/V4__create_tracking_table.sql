@@ -1,0 +1,12 @@
+CREATE TABLE user_activities (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BINARY(16) NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    endpoint VARCHAR(255) NOT NULL,
+    request_data TEXT,
+    response_data TEXT,
+    duration BIGINT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_date TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
+    last_modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

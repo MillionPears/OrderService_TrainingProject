@@ -1,3 +1,5 @@
+server:
+  port: 8082
 spring:
   application:
     name: order
@@ -7,19 +9,21 @@ spring:
     username: root
     password: root
 
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        format_sql: false
-        jdbc:
-          batch_size: 10
-        order_inserts: true
-        order_updates: true
-        generate_statistics: true
+  kafka:
+    bootstrap-servers: localhost:29092
+#  jpa:
+#    hibernate:
+#      ddl-auto: none
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQL8Dialect
+#        format_sql: false
+#        jdbc:
+#          batch_size: 10
+#        order_inserts: true
+#        order_updates: true
+#        generate_statistics: true
 #        use_sql_comments: true
 #        generate_statistics: true
 
@@ -28,11 +32,30 @@ logging:
 #    org.hibernate.SQL: DEBUG
 #    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 #    org.springframework.web: DEBUG
-    org.hibernate.jdbc.BatchingBatch: DEBUG
+#    org.hibernate.jdbc.BatchingBatch: DEBUG
 #    root: DEBUG
+    org.apache.kafka: DEBUG
+
+
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      acks: -1
+#      retries: 3
+#      properties:
+#        linger.ms: 5
+#        enable.idempotence: true
+#        max.in.flight.requests.per.connection: 5
 
   flyway:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
+
+#kafka:
+#  topics:
+#    order-inventory: order-inventory-topic
+#    order-payment: order-payment-topic
+#    partitions: 3
+#    replication-factor: 1
 

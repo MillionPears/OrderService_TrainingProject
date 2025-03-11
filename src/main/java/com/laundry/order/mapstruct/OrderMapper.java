@@ -20,11 +20,11 @@ public interface OrderMapper {
 //  @Mapping(target = "user.id", source = "userId")
   Order toEntity(OrderCreateRequest orderCreateRequest);
 
-  @Mapping(target = "userId", source = "user.id")
-  @Mapping(target = "items", ignore = true)
-  OrderResponse toDTO(Order order);
+//  @Mapping(target = "userId", source = "user.id")
+//  @Mapping(target = "items", ignore = true)
+//  OrderResponse toDTO(Order order);
 
-  @Mapping(target = "productName", source = "product.name")
-  OrderItemResponse toOrderItemResponse(OrderItem orderItem);
+//  @Mapping(target = "productName", source = "product.name")
+//  OrderItemResponse toOrderItemResponse(OrderItem orderItem);
 
 }
