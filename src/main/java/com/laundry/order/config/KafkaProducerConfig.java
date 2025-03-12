@@ -19,18 +19,16 @@ public class KafkaProducerConfig {
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapAddress;
 
-  private Map<String, Object> producerConfigs() {
+  @Bean
+  public ProducerFactory<String, String> producerFactoryForString() {
     Map<String, Object> configProps = new HashMap<>();
     configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configProps.put(ProducerConfig.RETRIES_CONFIG, 3);
-    return configProps;
-  }
-
-  @Bean
-  public ProducerFactory<String, String> producerFactoryForString() {
-    return new DefaultKafkaProducerFactory<>(producerConfigs());
+    configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+    configProps.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
+    return new DefaultKafkaProducerFactory<>(configProps);
   }
 
   @Bean

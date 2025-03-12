@@ -27,14 +27,14 @@ spring:
 #        use_sql_comments: true
 #        generate_statistics: true
 
-logging:
-  level:
-#    org.hibernate.SQL: DEBUG
-#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-#    org.springframework.web: DEBUG
-#    org.hibernate.jdbc.BatchingBatch: DEBUG
-#    root: DEBUG
-    org.apache.kafka: DEBUG
+#logging:
+#  level:
+##    org.hibernate.SQL: DEBUG
+##    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+##    org.springframework.web: DEBUG
+##    org.hibernate.jdbc.BatchingBatch: DEBUG
+##    root: DEBUG
+#    org.apache.kafka: DEBUG
 
 
 #    producer:
