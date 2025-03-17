@@ -50,13 +50,11 @@ public class Order extends AbstractVersionedEntity {
   @Column(name = "note")
   private String note;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
-  @NotNull
-  private User user;
 
-  @OneToMany(mappedBy = "order")
-  private List<OrderItem> items = new ArrayList<>();
+  @Column(name = "user_id", nullable = false)
+  @NotNull
+  private UUID userId;
+
 
   @Column(name = "idempotent_key", unique = true)
   private UUID idempotentKey;
