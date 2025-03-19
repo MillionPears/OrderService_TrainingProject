@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
   @Transactional()
   public UserResponse createUser( UserCreateRequest userCreateRequest) {
     User user = userMapper.toEntity(userCreateRequest);
-    if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.CONFLICT,"PhoneNumber already exists",user.getPhoneNumber());
+    if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) throw new CustomException(ErrorCode.PHONE_NUMBER_ALREADY_EXISTS,user.getPhoneNumber());
     user = userRepository.save(user);
 
     return
@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserResponse getUserByUserId(UUID userId) {
     User user = userRepository.findById(userId)
-      .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND,"User not found",userId));
+      .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,userId));
     return userMapper.toDTO(user);
   }
 
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
   public UserResponse updateUserById(UUID userId, UserUpdateRequest userUpdateRequest) {
     return transactionTemplate.execute(status -> {
       User user = userRepository.findById(userId)
-        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND,"user not found",userId));
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,userId));
       userMapper.updateUserFromRequest(userUpdateRequest, user);
       user = userRepository.save(user);
       return userMapper.toDTO(user);

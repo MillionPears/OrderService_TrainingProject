@@ -1,10 +1,14 @@
 package com.laundry.order.kafka.consumer;
 
 
+import com.laundry.order.entity.Order;
 import com.laundry.order.entity.OutboxEvent;
 import com.laundry.order.enums.KafkaTopic;
+import com.laundry.order.enums.OrderStatus;
 import com.laundry.order.enums.OutBoxEventStatus;
+import com.laundry.order.event.PaymentEvent;
 import com.laundry.order.parser.Parser;
+import com.laundry.order.repository.OrderRepository;
 import com.laundry.order.repository.OutBoxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -19,29 +23,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 @RequiredArgsConstructor
 public class OutBoxProcessorConsumer {
-  private final OutBoxRepository outboxEventRepository;
+  private final OrderRepository orderRepository;
+  private final Parser parser;
 
-  @KafkaListener(topics = "#{T(com.laundry.order.enums.KafkaTopic).INVENTORY_REDUCE_STOCK_STATUS.getTopicName()}",
+  @KafkaListener(topics = "#{T(com.laundry.order.enums.KafkaTopic).NOTIFY_PAYMENT_SUCCESS.getTopicName()}",
     groupId = "order-service-group")
-  @Transactional
-  public void consumeInventoryProcessStatusEvent(String status,@Header(KafkaHeaders.RECEIVED_KEY) String eventId){
-    log.info("[OUTBOX LISTENER INVENTORY ] -- Received confirmation for eventId: {} and status : {}", eventId,status);
-    OutboxEvent outboxEvent = outboxEventRepository.findById(Long.parseLong(eventId))
-      .orElseThrow(() -> new RuntimeException("OutboxEvent not found"));
-      outboxEvent.setStatus(OutBoxEventStatus.valueOf(status));
-      outboxEventRepository.save(outboxEvent);
-    log.info("[OUTBOX LISTENER INVENTORY] -- Marked event {} as status : {}", eventId,status);
+  public void consumePaymentProcessStatusEvent(String receivedEvent){
+    PaymentEvent paymentEvent = parser.parseToObject(receivedEvent, PaymentEvent.class);
+    Order order = orderRepository.findById(paymentEvent.getOrderId())
+      .orElseThrow(() -> new RuntimeException("Order not found"));
+    order.setStatus(OrderStatus.COMPLETED);
+    orderRepository.save(order);
   }
 
-  @KafkaListener(topics = "#{T(com.laundry.order.enums.KafkaTopic).PAYMENT_PROCESS_STATUS.getTopicName()}",
+  @KafkaListener(topics = "#{T(com.laundry.order.enums.KafkaTopic).NOTIFY_INVENTORY_COMPENSATION_ACTION.getTopicName()}",
     groupId = "order-service-group")
-  @Transactional
-  public void consumePaymentProcessStatusEvent(String status,@Header(KafkaHeaders.RECEIVED_KEY) String eventId){
-    log.info("[OUTBOX LISTENER PAYMENT] -- Received confirmation for eventId: {} and status : {}", eventId,status);
-    OutboxEvent outboxEvent = outboxEventRepository.findById(Long.parseLong(eventId))
-      .orElseThrow(() -> new RuntimeException("OutboxEvent not found"));
-    outboxEvent.setStatus(OutBoxEventStatus.valueOf(status));
-    outboxEventRepository.save(outboxEvent);
-    log.info("[OUTBOX LISTENER PAYMENT] -- Marked event {} as status : {}", eventId,status);
+  public void consumeInventoryCompensationEvent(String receivedEvent){
+    PaymentEvent paymentEvent = parser.parseToObject(receivedEvent, PaymentEvent.class);
+    Order order = orderRepository.findById(paymentEvent.getOrderId())
+      .orElseThrow(() -> new RuntimeException("Order not found"));
+    order.setStatus(OrderStatus.CANCELED);
+    orderRepository.save(order);
   }
 }

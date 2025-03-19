@@ -95,7 +95,7 @@ public class UserServiceTest {
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
     CustomException exception = assertThrows(CustomException.class,
       ()-> userService.updateUserById(userId, userUpdateRequest));
-    assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+    assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     verify(userRepository).findById(userId);
   }
 
@@ -109,7 +109,7 @@ public class UserServiceTest {
 
     CustomException exception = assertThrows(CustomException.class
       ,() -> userService.updateUserById(userId, userUpdateRequest) );
-    assertEquals(ErrorCode.CONFLICT, exception.getErrorCode());
+    assertEquals(ErrorCode.OPTIMISTIC_FAILURE, exception.getErrorCode());
     verify(userRepository).findById(userId);
     verify(userMapper).updateUserFromRequest(userUpdateRequest, user);
     verify(userRepository).save(user);

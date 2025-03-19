@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +28,17 @@ public class OrderController {
   public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
     @Valid @RequestBody OrderCreateRequest orderCreateRequest
     , @RequestHeader("Idempotent-Key") String idempotentKey
-  ) throws JsonProcessingException {
-    log.debug("[CREATE ORDER] [CONTROLLER] - Received request: [IP = {}], [IdempotentKey ={}]",
-      request.getRemoteAddr(), idempotentKey);
-    log.trace("This is a TRACE log to check if Log4j2 is working.");
-    OrderResponse orderResponse = orderService.createOrder(orderCreateRequest, idempotentKey);
+  )  {
+    String requestId = ThreadContext.get("requestId");
+    log.info("[CREATE ORDER] [CONTROLLER] - Received request: [ID = {}]",
+      requestId);
+    OrderResponse orderResponse = orderService.checkIdempotency(orderCreateRequest, idempotentKey);
+    if (orderResponse == null) {
+      orderResponse = orderService.createOrder(orderCreateRequest, idempotentKey);
+      orderService.processCreateOrder(orderCreateRequest, orderResponse.getId());
+    }
+//    OrderResponse orderResponse = orderService.createOrder(orderCreateRequest, idempotentKey);
+//    orderService.processCreateOrder(orderCreateRequest, orderResponse.getId());
     log.info("[CREATE ORDER] [SUCCESS] - Successfully: [OrderId ={}] ", orderResponse.getId());
     return ResponseEntity.status(HttpStatus.CREATED)
       .body(new ApiResponse<>(orderResponse));

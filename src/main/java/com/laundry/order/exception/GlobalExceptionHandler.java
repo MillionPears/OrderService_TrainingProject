@@ -18,9 +18,9 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(CustomException.class)
   public ResponseEntity<ErrorResponse> handleCustomException(CustomException ex) {
-    log.error("[EXCEPTION] - CustomException: {} | Code: {}", ex.getErrorMessage(), ex.getErrorCode().getStatus().value());
+    log.error("[EXCEPTION] - CustomException: {} | Code: {}", ex.getErrorMessage(), ex.getErrorCode().getCode());
     ErrorResponse response = ErrorResponse.of(
-      String.valueOf(ex.getErrorCode().getStatus().value()),
+      String.valueOf(ex.getErrorCode().getCode()),
       ex.getStatus(),
       ex.getErrorMessage(),
       null

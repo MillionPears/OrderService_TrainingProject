@@ -12,6 +12,7 @@ import org.springframework.kafka.core.ProducerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Configuration
 @EnableKafka
@@ -26,8 +27,9 @@ public class KafkaProducerConfig {
     configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configProps.put(ProducerConfig.RETRIES_CONFIG, 3);
-    configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
     configProps.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
+    configProps.put(ProducerConfig.ACKS_CONFIG, "all");
+    configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
     return new DefaultKafkaProducerFactory<>(configProps);
   }
 
