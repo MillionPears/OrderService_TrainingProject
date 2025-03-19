@@ -3,5 +3,5 @@ CREATE TABLE outbox_events (
     event_type VARCHAR(255) NOT NULL,
     payload TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('PENDING', 'PROCESSING', 'COMPLETED','FAILED')
+    status ENUM('PENDING', 'SENT')
 );

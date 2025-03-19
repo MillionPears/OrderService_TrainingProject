@@ -1,1 +1,1 @@
-ALTER TABLE orders ADD COLUMN idempotent_key BINARY(16);
+ALTER TABLE orders ADD COLUMN idempotent_key BINARY(16) NOT NULL            UNIQUE;

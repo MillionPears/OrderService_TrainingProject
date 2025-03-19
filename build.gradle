@@ -48,6 +48,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.2.0'
     implementation 'org.springframework.kafka:spring-kafka'
+    testImplementation 'io.debezium:debezium-embedded:2.4.0.Final'
+    implementation 'io.debezium:debezium-connector-mysql:2.4.0.Final'
+
+
+
 
 }
 
